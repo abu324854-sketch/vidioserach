@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Instant Search Engine Pro</title>
+    <title>AI Video Search & Face Recognition Engine Pro</title>
 
     <!-- Dynamic PWA Manifest -->
     <link id="manifest-placeholder" rel="manifest">
 
     <!-- OCR Engine (Tesseract.js) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    
+    <!-- Face Recognition Engine (face-api.js) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 
     <style>
         :root {
@@ -53,8 +56,12 @@
         input[type="text"] { flex: 1; padding: 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 8px; outline: none; font-size: 15px; }
         input[type="text"]:focus { border-color: var(--primary); }
 
-        .drop-zone { border: 2px dashed var(--card-border); border-radius: 12px; padding: 24px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; }
+        .drop-zone { border: 2px dashed var(--card-border); border-radius: 12px; padding: 20px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; }
         .drop-zone:hover { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
+
+        .face-database { border: 1px solid var(--card-border); border-radius: 10px; padding: 15px; margin-top: 15px; background: rgba(0,0,0,0.1); }
+        .face-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .face-chip { background: var(--primary); color: white; padding: 4px 10px; border-radius: 15px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
 
         .video-box { display: none; margin-top: 15px; }
         video { width: 100%; border-radius: 10px; background: #000; max-height: 400px; }
@@ -77,35 +84,46 @@
 <div class="container">
     <div class="card">
         <div class="header">
-            <h1>🎬 Video Qidiruv & Master Index Pro</h1>
-            <button class="btn btn-secondary" onclick="toggleTheme()">🌙 Rejim</button>
+            <h1>🎬 AI Video & Face Search Engine</h1>
+            <button class="btn btn-secondary" onclick="toggleTheme()">🌙 Режим</button>
         </div>
 
-        <!-- 1. URL -->
-        <div class="input-group">
-            <input type="text" id="videoUrl" placeholder="Video havolasini kiriting (https://...)">
-            <button class="btn" onclick="loadUrl()">Ochish</button>
+        <!-- База известных лиц -->
+        <div class="face-database">
+            <h4 style="font-size: 14px; margin-bottom: 8px;">👤 База известных лиц (Face Recognition):</h4>
+            <div class="input-group" style="margin-bottom: 5px;">
+                <input type="text" id="personName" placeholder="Имя человека (например, Otabek Umarov)">
+                <input type="file" id="personPhoto" accept="image/*" style="display:none" onchange="addPersonPhoto(event)">
+                <button class="btn" style="background: var(--accent);" onclick="document.getElementById('personPhoto').click()">Загрузить фото</button>
+            </div>
+            <div class="face-list" id="faceList"><i>Нет добавленных лиц. Загрузите фото человека для его распознавания в видео.</i></div>
         </div>
 
-        <!-- 2. Fayl -->
+        <!-- 1. URL видео -->
+        <div class="input-group" style="margin-top: 15px;">
+            <input type="text" id="videoUrl" placeholder="Вставьте ссылку на видео (https://...)">
+            <button class="btn" onclick="loadUrl()">Открыть</button>
+        </div>
+
+        <!-- 2. Файл видео -->
         <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-            📁 Videoni shu yerga tashlang yoki fayl tanlash uchun bosing
+            📁 Перетащите видео сюда или нажмите для выбора файла
             <input type="file" id="fileInput" accept="video/*" style="display:none" onchange="loadFile(event)">
         </div>
 
-        <!-- Subtitr fayli (ixtiyoriy) -->
+        <!-- Субтитры (опционально) -->
         <div style="margin-top: 12px; font-size: 12px; color: var(--text-sub);">
-            💡 Subtitr faylini (.srt/.vtt) yuklasangiz, audio nutq bo'yicha indeksatsiyalanadi:
+            💡 Субтитры (.srt/.vtt) для поиска по речи:
             <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 4px; display: block;">
         </div>
 
-        <!-- Video Player -->
+        <!-- Видеоплеер -->
         <div class="video-box" id="videoBox">
             <video id="player" controls crossorigin="anonymous"></video>
 
-            <div class="status-bar" id="statusBar">⏳ Video kadrlari skanerlanib, Master Index tuzilmoqda...</div>
+            <div class="status-bar" id="statusBar">⏳ ИИ сканирует кадры видео (OCR + Распознавание лиц)...</div>
 
-            <!-- Instrumentlar -->
+            <!-- Инструменты -->
             <div class="tools-grid">
                 <div>
                     <select class="select-custom" style="width:100%" onchange="changeSpeed(this.value)">
@@ -115,25 +133,25 @@
                         <option value="2.0">2.0x</option>
                     </select>
                 </div>
-                <button class="btn" onclick="takeSnapshot()">📷 Skrinshot</button>
-                <button class="btn" style="background:#f59e0b" onclick="addBookmark()">📌 Vaqt Belgisi</button>
+                <button class="btn" onclick="takeSnapshot()">📷 Скриншот</button>
+                <button class="btn" style="background:#f59e0b" onclick="addBookmark()">📌 Метка времени</button>
             </div>
 
-            <!-- Instant Search Input -->
+            <!-- Мгновенный поиск -->
             <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="searchKeyword" placeholder="Qidirilayotgan so'z yoki ismni kiriting (Real-time Instant Search)..." oninput="instantSearch()">
+                <input type="text" id="searchKeyword" placeholder="Введите имя человека или текст (Мгновенный поиск)..." oninput="instantSearch()">
             </div>
 
-            <!-- Search Results -->
+            <!-- Результаты -->
             <div class="results-list" id="resultsList"></div>
 
             <div style="margin-top: 15px;">
-                <h4 style="font-size: 14px; margin-bottom: 6px;">📌 Saqlangan Vaqt Belgilari:</h4>
-                <div class="results-list" id="bookmarksList"><i>Hali saqlanmadi.</i></div>
+                <h4 style="font-size: 14px; margin-bottom: 6px;">📌 Закладки времени:</h4>
+                <div class="results-list" id="bookmarksList"><i>Нет закладок.</i></div>
             </div>
 
             <div class="shortcuts-bar">
-                <b>⌨️ Hotkeys:</b> <b>Space / K</b>: Play/Pause | <b>F</b>: Fullscreen | <b>M</b>: Mute | <b>← / →</b>: 5 sek orqaga/oldinga | <b>Ctrl+F</b>: Qidiruv paneliga o'tish
+                <b>⌨️ Горячие клавиши:</b> <b>Space / K</b>: Пауза | <b>F</b>: Полный экран | <b>M</b>: Звук | <b>← / →</b>: 5 сек | <b>Ctrl+F</b>: Поиск
             </div>
         </div>
     </div>
@@ -148,35 +166,68 @@
     const bookmarksList = document.getElementById('bookmarksList');
     const statusBar = document.getElementById('statusBar');
     const scanCanvas = document.getElementById('scanCanvas');
+    const faceList = document.getElementById('faceList');
 
     let masterIndex = []; 
-    let subtitles = [];
+    let labeledFaceDescriptors = [];
+    let isFaceModelsLoaded = false;
     let bookmarks = [];
 
-    // PWA Dynamic Manifest
-    const manifestData = {
-        "name": "Video Search App Pro",
-        "short_name": "VideoSearch",
-        "start_url": ".",
-        "display": "standalone",
-        "background_color": "#0f172a",
-        "theme_color": "#2563eb",
-        "icons": [{
-            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>",
-            "sizes": "192x192 512x512",
-            "type": "image/svg+xml"
-        }]
+    // Загрузка нейросетей распознавания лиц при старте
+    window.onload = async () => {
+        try {
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+            isFaceModelsLoaded = true;
+            console.log("Модели Face-API успешно загружены");
+        } catch (e) {
+            console.warn("Ошибка загрузки моделей Face-API:", e);
+        }
     };
-    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-    document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(manifestBlob));
 
-    // Service Worker
-    if ('serviceWorker' in navigator) {
-        const swCode = `
-            self.addEventListener('install', (e) => self.skipWaiting());
-            self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-        `;
-        navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'text/javascript' })));
+    // Добавление эталонного фото человека
+    async function addPersonPhoto(e) {
+        const file = e.target.files[0];
+        const name = document.getElementById('personName').value.trim();
+        
+        if (!name) {
+            alert("Пожалуйста, сначала введите имя человека в поле!");
+            return;
+        }
+        if (!file) return;
+
+        if (!isFaceModelsLoaded) {
+            alert("ИИ нейросеть лиц ещё загружается, подождите пару секунд...");
+            return;
+        }
+
+        const img = await faceapi.bufferToImage(file);
+        const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+
+        if (detection) {
+            labeledFaceDescriptors.push(new faceapi.LabeledFaceDescriptors(name, [detection.descriptor]));
+            renderFaceList();
+            document.getElementById('personName').value = '';
+            alert(`Человек "${name}" успешно добавлен в базу ИИ!`);
+        } else {
+            alert("Лицо на фото не обнаружено. Попробуйте загрузить более чёткое фото.");
+        }
+    }
+
+    function renderFaceList() {
+        if (!labeledFaceDescriptors.length) {
+            faceList.innerHTML = '<i>Нет добавленных лиц.</i>';
+            return;
+        }
+        faceList.innerHTML = '';
+        labeledFaceDescriptors.forEach(desc => {
+            const div = document.createElement('div');
+            div.className = 'face-chip';
+            div.innerHTML = `👤 ${desc.label}`;
+            faceList.appendChild(div);
+        });
     }
 
     function loadFile(e) {
@@ -197,13 +248,8 @@
         }
     }
 
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-    }
-
-    function changeSpeed(val) {
-        player.playbackRate = parseFloat(val);
-    }
+    function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    function changeSpeed(val) { player.playbackRate = parseFloat(val); }
 
     function takeSnapshot() {
         const canvas = document.getElementById('scanCanvas');
@@ -212,14 +258,14 @@
         canvas.getContext('2d').drawImage(player, 0, 0, canvas.width, canvas.height);
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
-        a.download = `kadr_${Math.floor(player.currentTime)}s.png`;
+        a.download = `frame_${Math.floor(player.currentTime)}s.png`;
         a.click();
     }
 
     function addBookmark() {
         const time = player.currentTime;
         const formatted = formatTime(time);
-        const label = prompt("Izoh kiriting:", `Vaqt: ${formatted}`);
+        const label = prompt("Заметка:", `Время: ${formatted}`);
         if (label !== null) {
             bookmarks.push({ time, label: label || formatted, formatted });
             renderBookmarks();
@@ -227,7 +273,7 @@
     }
 
     function renderBookmarks() {
-        bookmarksList.innerHTML = bookmarks.length ? '' : '<i>Hali saqlanmadi.</i>';
+        bookmarksList.innerHTML = bookmarks.length ? '' : '<i>Нет закладок.</i>';
         bookmarks.forEach(bm => {
             const div = document.createElement('div');
             div.className = 'result-item';
@@ -243,7 +289,7 @@
         const reader = new FileReader();
         reader.onload = (evt) => {
             parseSRT(evt.target.result);
-            alert("Subtitrlar xotiraga yuklandi va Master Index'ga qo'shildi!");
+            alert("Субтитры успешно индексированы!");
         };
         reader.readAsText(file);
     }
@@ -258,7 +304,7 @@
                 if (timeLine) {
                     const [start] = timeLine.split('-->');
                     const sec = timeToSeconds(start.trim());
-                    masterIndex.push({ time: sec, text: textLines.toLowerCase(), type: '💬 Audio Subtitr' });
+                    masterIndex.push({ time: sec, text: textLines.toLowerCase(), type: '💬 Речь / Субтитры' });
                 }
             }
         });
@@ -275,10 +321,10 @@
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // Video yuklanganda Master Index yaratish (OCR Scan)
+    // ИИ Сканирование видеокадров (Распознавание Текста OCR + Распознавание Лиц)
     async function buildMasterIndex() {
         statusBar.style.display = 'block';
-        statusBar.textContent = "⚡ Master Index yaratilmoqda: Kadrlardagi ekran va yozuvlar skanerlanmoqda...";
+        statusBar.textContent = "⚡ ИИ индексирует видео: Анализ лиц людей и текста на кадрах...";
         
         const duration = player.duration || 40;
         const step = 3;
@@ -287,27 +333,43 @@
         scanCanvas.height = 270;
 
         const originalTime = player.currentTime;
+        let faceMatcher = labeledFaceDescriptors.length ? new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6) : null;
 
         for (let time = 0; time < duration; time += step) {
             player.currentTime = time;
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 120));
 
             ctx.drawImage(player, 0, 0, scanCanvas.width, scanCanvas.height);
+
+            // 1. Поиск текста на экране (Tesseract OCR)
             try {
                 const result = await Tesseract.recognize(scanCanvas, 'eng+rus');
                 const cleanText = result.data.text.trim().toLowerCase();
                 if (cleanText.length > 2) {
-                    masterIndex.push({ time: time, text: cleanText, type: '🖼️ Ekranda (OCR)' });
+                    masterIndex.push({ time: time, text: cleanText, type: '🖼️ Текст на экране' });
                 }
             } catch (e) {}
+
+            // 2. Распознавание лиц ИИ (Face API)
+            if (faceMatcher) {
+                try {
+                    const detections = await faceapi.detectAllFaces(scanCanvas).withFaceLandmarks().withFaceDescriptors();
+                    detections.forEach(d => {
+                        const match = faceMatcher.findBestMatch(d.descriptor);
+                        if (match.label !== 'unknown') {
+                            masterIndex.push({ time: time, text: match.label.toLowerCase(), type: `👤 Лицо человека (${match.label})` });
+                        }
+                    });
+                } catch (e) {}
+            }
         }
 
         player.currentTime = originalTime;
-        statusBar.textContent = "✅ Master Index tayyor! Istalgan matn yoki so'zni kiritsangiz, srazi natija beradi.";
+        statusBar.textContent = "✅ ИИ Анализ завершён! Введите имя человека или слово для поиска.";
         setTimeout(() => { statusBar.style.display = 'none'; }, 4000);
     }
 
-    // Instant (Darhol) Qidiruv
+    // Мгновенный поиск
     function instantSearch() {
         const query = document.getElementById('searchKeyword').value.toLowerCase().trim();
         resultsList.innerHTML = '';
@@ -317,7 +379,7 @@
         const matches = masterIndex.filter(item => item.text.includes(query));
 
         if (matches.length === 0) {
-            resultsList.innerHTML = '<div class="result-item">Hech qanday natija topilmadi.</div>';
+            resultsList.innerHTML = '<div class="result-item">Результатов не найдено. Убедитесь, что эталонное фото человека было добавлено в базу перед загрузкой видео.</div>';
             return;
         }
 
@@ -336,26 +398,15 @@
         });
     }
 
-    // Hotkey listener
     window.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return;
-        
-        if (e.code === 'Space' || e.key === 'k') {
-            e.preventDefault();
-            player.paused ? player.play() : player.pause();
-        } else if (e.key === 'f') {
-            !document.fullscreenElement ? player.requestFullscreen() : document.exitFullscreen();
-        } else if (e.key === 'm') {
-            player.muted = !player.muted;
-        } else if (e.key === 'ArrowRight') {
-            player.currentTime += 5;
-        } else if (e.key === 'ArrowLeft') {
-            player.currentTime -= 5;
-        } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            if (videoBox.style.display === 'block') {
-                e.preventDefault();
-                document.getElementById('searchKeyword').focus();
-            }
+        if (e.code === 'Space' || e.key === 'k') { e.preventDefault(); player.paused ? player.play() : player.pause(); }
+        else if (e.key === 'f') { !document.fullscreenElement ? player.requestFullscreen() : document.exitFullscreen(); }
+        else if (e.key === 'm') { player.muted = !player.muted; }
+        else if (e.key === 'ArrowRight') { player.currentTime += 5; }
+        else if (e.key === 'ArrowLeft') { player.currentTime -= 5; }
+        else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            if (videoBox.style.display === 'block') { e.preventDefault(); document.getElementById('searchKeyword').focus(); }
         }
     });
 </script>
