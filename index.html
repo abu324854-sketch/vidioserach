@@ -3,212 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Qidiruv va Player (To'liq Versiya)</title>
+    <title>Video Search & Intelligent Media Player Pro</title>
     <style>
         :root {
-            --bg-color: #f0f2f5;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --input-bg: #0f172a;
+        }
+
+        body.light-mode {
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
-            --text-color: #1c1e21;
-            --primary: #0d6efd;
-            --border-color: #ced4da;
-            --input-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #059669;
+            --danger: #dc2626;
+            --input-bg: #f1f5f9;
         }
 
-        body.dark-mode {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --primary: #3d8bfd;
-            --border-color: #444;
-            --input-bg: #2d2d2d;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; transition: background 0.2s, color 0.2s; }
-        body { background: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
-        .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); max-width: 700px; width: 100%; position: relative; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+        body { background: var(--bg-color); color: var(--text-main); padding: 24px; display: flex; justify-content: center; min-height: 100vh; }
         
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { color: var(--primary); font-size: 22px; }
-        .theme-toggle { cursor: pointer; padding: 6px 12px; background: var(--primary); color: #fff; border: none; border-radius: 20px; font-weight: 600; font-size: 13px; }
-
-        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; padding: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); border-radius: 8px; font-size: 15px; outline: none; }
-        button { padding: 12px 18px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        button:hover { opacity: 0.9; }
-
-        .drop-zone { border: 2px dashed var(--primary); border-radius: 12px; padding: 20px; text-align: center; background: rgba(13, 110, 253, 0.05); cursor: pointer; margin-bottom: 15px; }
+        .app-container { max-width: 850px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); padding: 28px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
         
-        .video-box { display: none; margin-top: 15px; }
-        video { width: 100%; border-radius: 10px; background: #000; max-height: 380px; }
-
-        /* Asboblar paneli (Tools Bar) */
-        .tools-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; }
-        .tool-btn { padding: 8px 12px; font-size: 13px; background: #28a745; }
-        .speed-select { padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); }
-
-        .search-in-video { display: flex; gap: 8px; margin-top: 15px; }
-        .results-list { margin-top: 10px; max-height: 150px; overflow-y: auto; }
-        .result-item { padding: 8px 12px; background: rgba(0,0,0,0.04); border-left: 4px solid var(--primary); margin-bottom: 6px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; font-size: 14px; }
-        .result-item:hover { background: rgba(0,0,0,0.08); }
-        .time-badge { font-weight: bold; color: var(--primary); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .header h1 { font-size: 24px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         
-        .bookmarks-sec { margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px; }
-        .sub-input { margin-top: 10px; font-size: 13px; opacity: 0.8; }
+        .btn { padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid var(--card-border); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); }
+        .btn-success { background: var(--accent); color: #fff; }
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 16px; }
+        input[type="text"] { flex: 1; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 10px; font-size: 14px; outline: none; }
+        input[type="text"]:focus { border-color: var(--primary); }
+
+        .drop-zone { border: 2px dashed var(--card-border); border-radius: 14px; padding: 28px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+        .drop-zone:hover { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+
+        .video-wrapper { display: none; margin-top: 20px; }
+        video { width: 100%; border-radius: 12px; background: #000; max-height: 420px; }
+
+        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; background: rgba(0,0,0,0.15); padding: 12px; border-radius: 12px; }
+        .select-custom { padding: 8px 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 8px; font-size: 13px; outline: none; }
+
+        .search-box { margin-top: 20px; display: flex; gap: 10px; }
+        .results-container { margin-top: 12px; max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .result-card { padding: 10px 14px; background: var(--input-bg); border-left: 4px solid var(--primary); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .result-card:hover { background: rgba(59, 130, 246, 0.1); }
+        .badge { background: var(--primary); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+
+        .shortcut-info { margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 12px; color: var(--text-sub); line-height: 1.6; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="header-bar">
-        <h1>🎬 Video Qidiruv va Media Player</h1>
-        <button class="theme-toggle" onclick="toggleDarkMode()">🌙 Qorong'i Rejim</button>
-    </div>
+<div class="app-container">
+    <div class="card">
+        <div class="header">
+            <h1>⚡ Video Player & Nutq Qidiruv Pro</h1>
+            <button class="btn btn-secondary" onclick="toggleTheme()">🌙 Rejim</button>
+        </div>
 
-    <!-- 1. Ssilka orqali yuklash -->
-    <div class="input-group">
-        <input type="text" id="videoUrl" placeholder="Video havolasini kiriting (https://...)">
-        <button onclick="loadUrl()">Ochish</button>
-    </div>
+        <!-- 1. Ssilka orqali yuklash -->
+        <div class="input-group">
+            <input type="text" id="videoUrl" placeholder="Video havolasini kiriting (https://...)">
+            <button class="btn btn-primary" onclick="loadUrl()">Ochish</button>
+        </div>
 
-    <!-- 2. Fayl yuklash -->
-    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-        📁 Videoni shu yerga tashlang yoki fayl tanlang
-        <input type="file" id="fileInput" accept="video/*" style="display:none" onchange="loadFile(event)">
-    </div>
+        <!-- 2. Fayl yuklash -->
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size: 36px; margin-bottom: 8px;">📁</div>
+            <p style="font-weight: 600;">Videoni shu yerga tashlang yoki faylni tanlang</p>
+            <p style="font-size: 13px; color: var(--text-sub); margin-top: 4px;">MP4, WebM, MKV formatlari qo'llab-quvvatlanadi</p>
+            <input type="file" id="fileInput" accept="video/*" style="display:none" onchange="loadFile(event)">
+        </div>
 
-    <!-- Subtitr fayli yuklash -->
-    <div class="sub-input">
-        <label>💡 Subtitr faylini (.srt/.vtt) yuklasangiz, nutq bo'yicha qidiruv yoqiladi:</label>
-        <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 5px;">
-    </div>
+        <!-- Subtitr yuklash -->
+        <div style="margin-top: 16px;">
+            <label style="font-size: 13px; color: var(--text-sub);">💡 Videodagi nutq bo'yicha qidirish uchun subtitr (.vtt, .srt) biriktiring:</label>
+            <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 6px; display: block; font-size: 13px;">
+        </div>
 
-    <!-- Video Pleyer va Boshqaruv Panel -->
-    <div class="video-box" id="videoBox">
-        <video id="player" controls></video>
+        <!-- Video Player va Xususiyatlar -->
+        <div class="video-wrapper" id="videoWrapper">
+            <video id="player" controls></video>
 
-        <!-- Funksional tugmalar -->
-        <div class="tools-bar">
-            <div>
-                <label style="font-size: 13px; font-weight: bold;">Tezlik: </label>
-                <select class="speed-select" onchange="changeSpeed(this.value)">
-                    <option value="0.5">0.5x</option>
-                    <option value="1.0" selected>1.0x (Normal)</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.5">1.5x</option>
-                    <option value="2.0">2.0x</option>
-                </select>
+            <div class="controls-grid">
+                <div>
+                    <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 4px;">Tezlik</label>
+                    <select class="select-custom" style="width: 100%;" onchange="changeSpeed(this.value)">
+                        <option value="0.5">0.5x</option>
+                        <option value="1.0" selected>1.0x (Normal)</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2.0">2.0x</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="takeSnapshot()">📷 Skrinshot</button>
+                <button class="btn btn-secondary" onclick="togglePiP()">🖼️ PiP Oyna</button>
+                <button class="btn btn-primary" onclick="addBookmark()">📌 Vaqt belgisi</button>
             </div>
-            <button class="tool-btn" onclick="takeSnapshot()">📷 Skrinshot Olish</button>
-            <button class="tool-btn" style="background:#ffc107; color:#000;" onclick="addBookmark()">📌 Vaqt Belgisini Saqlash</button>
-        </div>
 
-        <!-- Video ichidan Ctrl+F va Matnli Qidiruv -->
-        <div class="search-in-video">
-            <input type="text" id="searchKeyword" placeholder="Videodagi so'z yoki matnni yozing (Ctrl+F)..." oninput="searchInVideo()">
-            <button onclick="searchInVideo()">Topish</button>
-        </div>
+            <!-- In-Video Text Search -->
+            <div class="search-box">
+                <input type="text" id="searchKeyword" placeholder="Videodagi nutq matnini yozing (Ctrl+F)..." oninput="searchInVideo()">
+                <button class="btn btn-primary" onclick="searchInVideo()">Qidirish</button>
+            </div>
+            <div class="results-container" id="resultsContainer"></div>
 
-        <div class="results-list" id="resultsList"></div>
+            <!-- Vaqt belgilari ro'yxati -->
+            <div style="margin-top: 20px;">
+                <h4 style="font-size: 14px; margin-bottom: 8px;">📌 Saqlangan Vaqt Belgilari</h4>
+                <div class="results-container" id="bookmarksContainer"><i>Belgilar yo'q.</i></div>
+            </div>
 
-        <!-- Saqlangan vaqt belgilari (Bookmarks) -->
-        <div class="bookmarks-sec">
-            <h4 style="font-size: 14px; margin-bottom: 8px;">📌 Saqlangan Vaqt Belgilari:</h4>
-            <div id="bookmarksList"><i>Hali hech qanday vaqt belgisi saqlanmadi.</i></div>
+            <!-- Klaviatura Shotkatlari Ko'rsatmasi -->
+            <div class="shortcut-info">
+                <strong>⌨️ Tezkor Tugmalar:</strong> <b>Space / K</b> - Pauza/Ijro | <b>F</b> - To'liq ekran | <b>M</b> - Ovozni o'chirish | <b>← / →</b> - 5 sek orqaga/oldinga | <b>Ctrl+F</b> - Matn qidiruv
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Yordamchi Canvas element (Skrinshot uchun) -->
 <canvas id="snapshotCanvas" style="display:none;"></canvas>
 
 <script>
     const player = document.getElementById('player');
-    const videoBox = document.getElementById('videoBox');
-    const resultsList = document.getElementById('resultsList');
-    const bookmarksList = document.getElementById('bookmarksList');
+    const videoWrapper = document.getElementById('videoWrapper');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const bookmarksContainer = document.getElementById('bookmarksContainer');
     let subtitles = [];
     let bookmarks = [];
 
-    // Videoni fayldan yuklash
     function loadFile(e) {
         const file = e.target.files[0];
         if (file) {
             player.src = URL.createObjectURL(file);
-            videoBox.style.display = 'block';
+            videoWrapper.style.display = 'block';
         }
     }
 
-    // Videoni URL'dan yuklash
     function loadUrl() {
         const url = document.getElementById('videoUrl').value.trim();
         if (url) {
             player.src = url;
-            videoBox.style.display = 'block';
+            videoWrapper.style.display = 'block';
         }
     }
 
-    // 1. Qorong'i Rejim (Dark Mode)
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
     }
 
-    // 2. Ijro Tezligini O'zgartirish
     function changeSpeed(speed) {
         player.playbackRate = parseFloat(speed);
     }
 
-    // 3. Videodan Skrinshot Olish
+    async function togglePiP() {
+        try {
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+            } else {
+                await player.requestPictureInPicture();
+            }
+        } catch (err) {
+            alert("Brauzeringiz Picture-in-Picture funksiyasini qo'llab-quvvatlamaydi.");
+        }
+    }
+
     function takeSnapshot() {
         const canvas = document.getElementById('snapshotCanvas');
         canvas.width = player.videoWidth;
         canvas.height = player.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(player, 0, 0, canvas.width, canvas.height);
+        canvas.getContext('2d').drawImage(player, 0, 0, canvas.width, canvas.height);
 
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
-        a.download = `video_skrinshot_${Math.floor(player.currentTime)}s.png`;
+        a.download = `kadr_${Math.floor(player.currentTime)}s.png`;
         a.click();
     }
 
-    // 4. Vaqt Belgisini Saqlash (Bookmark)
     function addBookmark() {
         const time = player.currentTime;
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-        const note = prompt("Eslatma yozing (ixtiyoriy):", `Vaqt belgisi - ${timeFormatted}`);
-        if (note !== null) {
-            bookmarks.push({ time, label: note || timeFormatted, timeFormatted });
+        const formatted = formatTime(time);
+        const label = prompt("Belgi izohini kiriting:", `Vaqt: ${formatted}`);
+        if (label !== null) {
+            bookmarks.push({ time, label: label || formatted, formatted });
             renderBookmarks();
         }
     }
 
     function renderBookmarks() {
-        if (bookmarks.length === 0) {
-            bookmarksList.innerHTML = '<i>Hali hech qanday vaqt belgisi saqlanmadi.</i>';
+        if (!bookmarks.length) {
+            bookmarksContainer.innerHTML = '<i>Belgilar yo\'q.</i>';
             return;
         }
-        bookmarksList.innerHTML = '';
+        bookmarksContainer.innerHTML = '';
         bookmarks.forEach(bm => {
-            const div = document.createElement('div');
-            div.className = 'result-item';
-            div.innerHTML = `<span>📝 ${bm.label}</span> <span class="time-badge">${bm.timeFormatted}</span>`;
-            div.onclick = () => { player.currentTime = bm.time; player.play(); };
-            bookmarksList.appendChild(div);
+            const el = document.createElement('div');
+            el.className = 'result-card';
+            el.innerHTML = `<span>📌 ${bm.label}</span> <span class="badge">${bm.formatted}</span>`;
+            el.onclick = () => { player.currentTime = bm.time; player.play(); };
+            bookmarksContainer.appendChild(el);
         });
     }
 
-    // 5. Subtitr matni faylini (.srt/.vtt) o'qish va qidirish
     function loadSubtitles(e) {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = (evt) => {
             parseSRT(evt.target.result);
-            alert("Subtitrlar yuklandi! Endi matn bo'yicha qidirishingiz mumkin.");
+            alert("Subtitr yuklandi va tahlil qilindi!");
         };
         reader.readAsText(file);
     }
@@ -223,8 +243,7 @@
                 const textLines = lines.slice(lines.indexOf(timeLine) + 1).join(' ');
                 if (timeLine) {
                     const [start] = timeLine.split('-->');
-                    const seconds = timeToSeconds(start.trim());
-                    subtitles.push({ time: seconds, text: textLines });
+                    subtitles.push({ time: timeToSeconds(start.trim()), text: textLines });
                 }
             }
         });
@@ -232,40 +251,53 @@
 
     function timeToSeconds(timeStr) {
         const parts = timeStr.replace(',', '.').split(':');
-        if (parts.length === 3) {
-            return parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]);
-        }
-        return 0;
+        return parts.length === 3 ? parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]) : 0;
+    }
+
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
     function searchInVideo() {
         const query = document.getElementById('searchKeyword').value.toLowerCase().trim();
-        resultsList.innerHTML = '';
+        resultsContainer.innerHTML = '';
         if (!query) return;
 
-        const matches = subtitles.filter(item => item.text.toLowerCase().includes(query));
-        if (matches.length === 0) {
-            resultsList.innerHTML = '<div class="result-item">Matn topilmadi.</div>';
+        const matches = subtitles.filter(s => s.text.toLowerCase().includes(query));
+        if (!matches.length) {
+            resultsContainer.innerHTML = '<div class="result-card">Mos keluvchi nutq topilmadi.</div>';
             return;
         }
 
-        matches.forEach(item => {
+        matches.forEach(m => {
             const div = document.createElement('div');
-            div.className = 'result-item';
-            const minutes = Math.floor(item.time / 60);
-            const seconds = Math.floor(item.time % 60);
-            const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-            div.innerHTML = `<span>${item.text}</span> <span class="time-badge">${timeFormatted}</span>`;
-            div.onclick = () => { player.currentTime = item.time; player.play(); };
-            resultsList.appendChild(div);
+            div.className = 'result-card';
+            div.innerHTML = `<span>💬 ${m.text}</span> <span class="badge">${formatTime(m.time)}</span>`;
+            div.onclick = () => { player.currentTime = m.time; player.play(); };
+            resultsContainer.appendChild(div);
         });
     }
 
-    // Ctrl + F tugmasi bosilganda avtomatik qidiruvga o'tish
-    window.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            if (videoBox.style.display === 'block') {
+    // Hotkeys / Keyboards
+    window.addEventListener('keydown', (e) => {
+        if (document.activeElement.tagName === 'INPUT') return;
+        
+        if (e.code === 'Space' || e.key === 'k') {
+            e.preventDefault();
+            player.paused ? player.play() : player.pause();
+        } else if (e.key === 'f') {
+            if (!document.fullscreenElement) player.requestFullscreen();
+            else document.exitFullscreen();
+        } else if (e.key === 'm') {
+            player.muted = !player.muted;
+        } else if (e.key === 'ArrowRight') {
+            player.currentTime += 5;
+        } else if (e.key === 'ArrowLeft') {
+            player.currentTime -= 5;
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            if (videoWrapper.style.display === 'block') {
                 e.preventDefault();
                 document.getElementById('searchKeyword').focus();
             }
