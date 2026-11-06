@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Ekrani va Nutqidan Matn Qidiruv Pro</title>
-    <!-- Tesseract.js (Ekrondagi matnni / OCR aniqlash kutubxonasi) -->
+    <title>Tezkor Video Matn Qidiruvi Pro</title>
+    <!-- Tesseract.js (Ekrondagi matnlar uchun) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root {
@@ -23,26 +23,23 @@
         .app-container { max-width: 850px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
         .card { background: var(--card-bg); border: 1px solid var(--card-border); padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         
-        h1 { font-size: 22px; color: var(--primary); margin-bottom: 20px; text-align: center; }
+        h1 { font-size: 20px; color: var(--primary); margin-bottom: 16px; text-align: center; }
         
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; padding: 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 8px; outline: none; }
+        input[type="text"] { flex: 1; padding: 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 8px; outline: none; font-size: 15px; }
+        input[type="text"]:focus { border-color: var(--primary); }
         
-        .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; background: var(--primary); color: #fff; transition: 0.2s; }
+        .btn { padding: 12px 20px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; background: var(--primary); color: #fff; transition: 0.2s; }
         .btn:hover { opacity: 0.9; }
 
-        .drop-zone { border: 2px dashed var(--card-border); border-radius: 12px; padding: 24px; text-align: center; background: rgba(255,255,255,0.02); cursor: pointer; }
+        .drop-zone { border: 2px dashed var(--card-border); border-radius: 12px; padding: 20px; text-align: center; background: rgba(255,255,255,0.02); cursor: pointer; font-size: 14px; }
         
         .video-wrapper { display: none; margin-top: 20px; }
-        video { width: 100%; border-radius: 10px; background: #000; max-height: 400px; }
+        video { width: 100%; border-radius: 10px; background: #000; max-height: 360px; }
 
-        .mode-selector { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 10px; }
-        .mode-btn { flex: 1; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-sub); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-align: center; }
-        .mode-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .status-box { margin-top: 12px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 6px; font-size: 13px; color: var(--primary); text-align: center; display: none; }
 
-        .scan-progress { display: none; margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 6px; font-size: 13px; color: var(--primary); text-align: center; }
-
-        .results-list { margin-top: 12px; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .results-list { margin-top: 12px; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .result-item { padding: 10px 14px; background: var(--input-bg); border-left: 4px solid var(--primary); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
         .result-item:hover { background: rgba(59, 130, 246, 0.15); }
         .badge { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
@@ -52,43 +49,36 @@
 
 <div class="app-container">
     <div class="card">
-        <h1>🔍 Universal Video Matn Qidiruvi (Ekranda & Nutqda)</h1>
+        <h1>⚡ Tezkor Video Matn Qidiruvi (Srazi Topish)</h1>
 
-        <!-- 1. URL orqali -->
+        <!-- 1. URL -->
         <div class="input-group">
             <input type="text" id="videoUrl" placeholder="Video havolasini kiriting (https://...)">
-            <button class="btn" onclick="loadUrl()">Ochish</button>
+            <button class="btn" onclick="loadUrl()">Yuklash</button>
         </div>
 
-        <!-- 2. Fayl yuklash -->
+        <!-- 2. Fayl -->
         <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-            📁 Videoni shu yerga tashlang yoki fayl tanlang
+            📁 Videoni shu yerga tashlang yoki tanlash uchun bosing
             <input type="file" id="fileInput" accept="video/*" style="display:none" onchange="loadFile(event)">
         </div>
 
-        <!-- Subtitr ixtiyoriy -->
+        <!-- Subtitr (ixtiyoriy, tezlik uchun) -->
         <div style="margin-top: 10px; font-size: 12px; color: var(--text-sub);">
-            💡 Subtitr fayli (.srt/.vtt) bo'lsa yuklang (ixtiyoriy, tezroq qidiradi):
+            💡 Agar bo'lsa, subtitr (.srt / .vtt) faylini ham qo'shishingiz mumkin:
             <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 4px; display: block;">
         </div>
 
-        <!-- Video Player -->
+        <!-- Video Player va Qidiruv -->
         <div class="video-wrapper" id="videoWrapper">
             <video id="player" controls crossorigin="anonymous"></video>
 
-            <!-- Qidiruv rejimlari -->
-            <div class="mode-selector">
-                <div class="mode-btn active" id="modeAll" onclick="setSearchMode('all')">🌐 Har qanday matn (Ekranda + Nutqda)</div>
-                <div class="mode-btn" id="modeScreen" onclick="setSearchMode('screen')">🖼️ Faqat ekrandagi matnlar (OCR)</div>
-            </div>
+            <div class="status-box" id="statusBox">⏳ Video tahlil qilinmoqda...</div>
 
-            <!-- Matnli Qidiruv -->
-            <div class="input-group">
-                <input type="text" id="searchKeyword" placeholder="Videodan qidirmoqchi bo'lgan matningizni yozing..." onkeypress="if(event.key==='Enter') startSearch()">
-                <button class="btn" onclick="startSearch()">Qidirish</button>
+            <!-- Darhol qidirish satri -->
+            <div class="input-group" style="margin-top: 15px;">
+                <input type="text" id="searchKeyword" placeholder="Qidirmoqchi bo'lgan so'zingizni yozing (Srazi topadi)..." oninput="instantSearch()">
             </div>
-
-            <div class="scan-progress" id="scanProgress">🔍 Video kadrlari skanerlanmoqda, kuting...</div>
 
             <!-- Natijalar -->
             <div class="results-list" id="resultsList"></div>
@@ -102,17 +92,18 @@
     const player = document.getElementById('player');
     const videoWrapper = document.getElementById('videoWrapper');
     const resultsList = document.getElementById('resultsList');
-    const scanProgress = document.getElementById('scanProgress');
+    const statusBox = document.getElementById('statusBox');
     const scanCanvas = document.getElementById('scanCanvas');
     
+    let masterIndex = []; // Videodagi barcha vaqtlar va ularga mos matnlar bazasi
     let subtitles = [];
-    let searchMode = 'all';
 
     function loadFile(e) {
         const file = e.target.files[0];
         if (file) {
             player.src = URL.createObjectURL(file);
             videoWrapper.style.display = 'block';
+            analyzeVideo();
         }
     }
 
@@ -121,13 +112,8 @@
         if (url) {
             player.src = url;
             videoWrapper.style.display = 'block';
+            analyzeVideo();
         }
-    }
-
-    function setSearchMode(mode) {
-        searchMode = mode;
-        document.getElementById('modeAll').classList.toggle('active', mode === 'all');
-        document.getElementById('modeScreen').classList.toggle('active', mode === 'screen');
     }
 
     function loadSubtitles(e) {
@@ -136,7 +122,7 @@
         const reader = new FileReader();
         reader.onload = (evt) => {
             parseSRT(evt.target.result);
-            alert("Subtitr matnlari yuklandi!");
+            alert("Subtitrlar muvaffaqiyatli qo'shildi!");
         };
         reader.readAsText(file);
     }
@@ -151,7 +137,9 @@
                 const textLines = lines.slice(lines.indexOf(timeLine) + 1).join(' ');
                 if (timeLine) {
                     const [start] = timeLine.split('-->');
-                    subtitles.push({ time: timeToSeconds(start.trim()), text: textLines });
+                    const sec = timeToSeconds(start.trim());
+                    subtitles.push({ time: sec, text: textLines.toLowerCase() });
+                    masterIndex.push({ time: sec, text: textLines.toLowerCase(), type: '💬 Nutq' });
                 }
             }
         });
@@ -168,72 +156,69 @@
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // Har qanday vaziyatda matn qidirish (OCR + Subtitr)
-    async function startSearch() {
-        const query = document.getElementById('searchKeyword').value.toLowerCase().trim();
-        resultsList.innerHTML = '';
-        if (!query) return;
+    // Videoni yuklaganda bir marta fonda skanerlab bazani shakllantirish
+    async function analyzeVideo() {
+        statusBox.style.display = 'block';
+        statusBox.textContent = "⚡ Video kadr va matnlari xotiraga yig'ilmoqda (kuting)...";
+        
+        masterIndex = [...subtitles]; // Oldin subtitrlarni qo'shamiz
 
-        let found = false;
-
-        // 1. Subtitr/Nutq xotirasidan qidirish
-        if (searchMode !== 'screen' && subtitles.length > 0) {
-            const matches = subtitles.filter(s => s.text.toLowerCase().includes(query));
-            matches.forEach(m => {
-                addResultItem(`💬 Nutqda: "${m.text}"`, m.time);
-                found = true;
-            });
-        }
-
-        // 2. Video Ekranidagi kadrlarni skanerlash (OCR yordamida ekrandagi yozuvlarni topish)
-        scanProgress.style.display = 'block';
-        scanProgress.textContent = "🔍 Video ekranidagi kadrlardan matn skanerlanmoqda (har 3 soniyada)...";
-
-        const duration = player.duration || 60;
-        const step = 3; // Har 3 soniyadagi kadrni tekshirish
+        const duration = player.duration || 30;
+        const step = 4; // Har 4 soniyada bir kadrni skanerlash
         const ctx = scanCanvas.getContext('2d');
-        scanCanvas.width = player.videoWidth || 640;
-        scanCanvas.height = player.videoHeight || 360;
+        scanCanvas.width = 480;
+        scanCanvas.height = 270;
 
         const originalTime = player.currentTime;
 
         for (let time = 0; time < duration; time += step) {
             player.currentTime = time;
-            await new Promise(r => setTimeout(r, 150)); // Kadr yuklanishini kutish
+            await new Promise(r => setTimeout(r, 120));
 
             ctx.drawImage(player, 0, 0, scanCanvas.width, scanCanvas.height);
-            
             try {
-                // Tesseract AI yordamida kadrdagi matnni o'qish
                 const result = await Tesseract.recognize(scanCanvas, 'eng+rus');
-                const textOnScreen = result.data.text.toLowerCase();
-
-                if (textOnScreen.includes(query)) {
-                    addResultItem(`🖼️ Ekranda: "${result.data.text.trim().substring(0, 40)}..."`, time);
-                    found = true;
+                const cleanText = result.data.text.trim().toLowerCase();
+                if (cleanText.length > 2) {
+                    masterIndex.push({ time: time, text: cleanText, type: '🖼️ Ekranda' });
                 }
-            } catch (err) {
-                console.log("Kadr o'qishda xato:", err);
-            }
+            } catch (e) {}
         }
 
         player.currentTime = originalTime;
-        scanProgress.style.display = 'none';
-
-        if (!found) {
-            resultsList.innerHTML = '<div class="result-item">Ushbu matn ekranda ham, nutqda ham topilmadi.</div>';
-        }
+        statusBox.textContent = "✅ Tayyor! Endi istalgan so'zni yozing — srazi topadi.";
+        setTimeout(() => { statusBox.style.display = 'none'; }, 4000);
     }
 
-    function addResultItem(text, time) {
-        const div = document.createElement('div');
-        div.className = 'result-item';
-        div.innerHTML = `<span>${text}</span> <span class="badge">${formatTime(time)}</span>`;
-        div.onclick = () => {
-            player.currentTime = time;
-            player.play();
-        };
-        resultsList.appendChild(div);
+    // Harf yozilgan zahoti (srazi) natijani chiqarish
+    function instantSearch() {
+        const query = document.getElementById('searchKeyword').value.toLowerCase().trim();
+        resultsList.innerHTML = '';
+
+        if (!query || query.length < 2) return;
+
+        // Xotiradagi bazadan darhol qidirish (serverga murojaat yo'q, 0 soniya kutish)
+        const matches = masterIndex.filter(item => item.text.includes(query));
+
+        if (matches.length === 0) {
+            resultsList.innerHTML = '<div class="result-item">Hech qanday natija topilmadi.</div>';
+            return;
+        }
+
+        // Takroriy vaqtlarni tozalash
+        const uniqueMatches = Array.from(new Set(matches.map(m => m.time)))
+            .map(time => matches.find(m => m.time === time));
+
+        uniqueMatches.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `<span>${m.type}: "${m.text.substring(0, 45)}..."</span> <span class="badge">${formatTime(m.time)}</span>`;
+            div.onclick = () => {
+                player.currentTime = m.time;
+                player.play();
+            };
+            resultsList.appendChild(div);
+        });
     }
 </script>
 
