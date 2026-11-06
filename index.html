@@ -3,215 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Search - To'liq Loyiha</title>
-    <link id="manifest-placeholder" rel="manifest">
+    <title>Video Qidiruv va Yuklovchi</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --border: #e2e8f0;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
-        .wrapper { max-width: 800px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
-        .card { background: var(--card-bg); padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        h1 { font-size: 22px; color: var(--primary); margin-bottom: 16px; text-align: center; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 16px; }
-        input[type="text"] { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 15px; }
-        input[type="text"]:focus { border-color: var(--primary); }
-        button { padding: 10px 20px; background-color: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
-        button:hover { background-color: var(--primary-hover); }
-        .tabs { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 8px; flex-wrap: wrap; }
-        .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
-        .tab-btn.active { background: var(--primary); color: white; }
-        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; max-height: 300px; }
-        .result-box { margin-top: 10px; padding: 12px; background: #eff6ff; border-left: 4px solid var(--primary); border-radius: 4px; }
+
+        body {
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #0d6efd;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #0d6efd;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* Drag & Drop Fayl Zonasi */
+        .drop-zone {
+            border: 2px dashed #0d6efd;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            background: #f8faff;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+
+        .drop-zone:hover {
+            background: #e7f1ff;
+        }
+
+        .drop-zone p {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Video Pleyer Zonasi */
+        .video-container {
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+            max-height: 350px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 20px;
+            background-color: #198754;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .download-btn:hover {
+            background-color: #157347;
+        }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <!-- Veb Ilova qismi -->
-        <div class="card">
-            <h1>🎬 Video Qidiruv Tizimi</h1>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Videolarni qidirish...">
-                <button onclick="searchVideos()">Qidirish</button>
-            </div>
-            <div id="results"></div>
+
+    <div class="main-card">
+        <h1>🎬 Video Qidiruv va Yuklash</h1>
+
+        <!-- 1. Ssilka orqali yuklash / ko'rish -->
+        <div class="section-title">1. Internet yoki tarmoqlardan havola (link) orqali:</div>
+        <div class="input-group">
+            <input type="text" id="videoUrlInput" placeholder="Video havolasini kiriting (https://...)">
+            <button onclick="loadFromUrl()">Ochish</button>
         </div>
 
-        <!-- Arxivdagi barcha fayllar tarkibi -->
-        <div class="card">
-            <h2 style="font-size: 18px; margin-bottom: 12px; color: #334155;">ZIP Arxivdagi Barcha Fayllar Tarkibi</h2>
-            <div class="tabs" id="fileTabs"></div>
-            <pre><code id="fileContent">Faylni tanlang...</code></pre>
+        <!-- 2. Kompyuter/Telefondan fayl yuklash -->
+        <div class="section-title">2. Qurilmangizdan video fayl tanlang:</div>
+        <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+            <span style="font-size: 32px;">📁</span>
+            <p>Videoni shu yerga tashlang yoki fayl tanlash uchun bosing</p>
+            <input type="file" id="fileInput" accept="video/*" onchange="handleFileSelect(event)">
+        </div>
+
+        <!-- Video pleyer va yuklash tugmasi -->
+        <div class="video-container" id="videoContainer">
+            <div class="section-title">Video tomosha va yuklab olish:</div>
+            <video id="videoPlayer" controls></video>
+            <br>
+            <a id="downloadLink" class="download-btn" download="video.mp4">Videoni saqlash (Download)</a>
         </div>
     </div>
 
     <script>
-        // PWA Dynamic Manifest
-        const manifestData = {
-            "name": "Video Search App",
-            "short_name": "VideoSearch",
-            "start_url": ".",
-            "display": "standalone",
-            "background_color": "#ffffff",
-            "theme_color": "#2563eb",
-            "icons": [{
-                "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>",
-                "sizes": "192x192 512x512",
-                "type": "image/svg+xml"
-            }]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-        document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(manifestBlob));
+        const videoContainer = document.getElementById('videoContainer');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const downloadLink = document.getElementById('downloadLink');
 
-        // Qidiruv funksiyasi
-        function searchVideos() {
-            const query = document.getElementById('searchInput').value.trim();
-            const resultsDiv = document.getElementById('results');
-            if (!query) {
-                resultsDiv.innerHTML = '<div class="result-box" style="background:#ffeeef; border-color:#dc2626; color:#991b1b;">Iltimos, qidirish uchun so\'z kiriting!</div>';
+        // 1. Ssilka (URL) orqali yuklash va pleyerga qo'yish
+        function loadFromUrl() {
+            const url = document.getElementById('videoUrlInput').value.trim();
+            if (!url) {
+                alert("Iltimos, haqiqiy video havolasini kiriting!");
                 return;
             }
-            resultsDiv.innerHTML = `<div class="result-box"><strong>Qidirildi:</strong> "${query}" bo'yicha natijalar topildi (app.py backend simulyatsiyasi).</div>`;
+
+            videoPlayer.src = url;
+            downloadLink.href = url;
+            downloadLink.target = "_blank";
+            videoContainer.style.display = "block";
+            videoPlayer.play();
         }
 
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchVideos();
-        });
-
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', (e) => console.log('SW O\\'rnatildi'));
-                self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then(res => res || fetch(e.request))));
-            `;
-            navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'text/javascript' })));
+        // 2. Qurilma ichidagi faylni tanlash va ijro etish
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                videoPlayer.src = fileURL;
+                downloadLink.href = fileURL;
+                downloadLink.download = file.name;
+                videoContainer.style.display = "block";
+                videoPlayer.play();
+            }
         }
 
-        // Arxivdagi barcha fayllar ma'lumotlar bazasi
-        const projectFiles = {
-            "app.py": `from flask import Flask, render_template, request, jsonify
-import requests
-
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/search', methods=['POST'])
-def search():
-    data = request.json
-    query = data.get('query', '')
-    return jsonify({"status": "success", "query": query, "results": []})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)`,
-
-            "Dockerfile": `FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]`,
-
-            "requirements.txt": `Flask==3.0.0
-gunicorn==21.2.0
-requests==2.31.0
-beautifulsoup4==4.12.2`,
-
-            "README.md": `# Videosearch App
-Bu ilova videolarni tezkor qidirish va PWA rejimida ishlash uchun mo'ljallangan Flask veb-ilovasi.
-
-## Ishga tushirish:
-1. pip install -r requirements.txt
-2. python app.py`,
-
-            "start.sh": `#!/bin/bash
-echo "Videosearch loyihasi ishga tushirilmoqda..."
-pip install -r requirements.txt
-python app.py`,
-
-            "start_windows.bat": `@echo off
-echo Videosearch ishga tushirilmoqda...
-python -m pip install -r requirements.txt
-python app.py
-pause`,
-
-            "make_icons.py": `import os
-
-def create_placeholder_icons():
-    os.makedirs('static', exist_ok=True)
-    print("Icon fayllari uchun papka tayyorlandi.")
-
-if __name__ == '__main__':
-    create_placeholder_icons()`,
-
-            "sw.js": `self.addEventListener('install', (e) => {
-  console.log('[Service Worker] o\\'rnatildi');
-});
-
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
-    })
-  );
-});`,
-
-            "manifest.webmanifest": `{
-  "name": "Video Search App",
-  "short_name": "VideoSearch",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "icons": [
-    {
-      "src": "/static/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/static/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}`,
-
-            ".dockerignore": `__pycache__
-*.pyc
-*.pyo
-*.pyd
-.git
-.gitignore
-venv/
-env/`
-        };
-
-        const tabsContainer = document.getElementById('fileTabs');
-        const contentBox = document.getElementById('fileContent');
-
-        Object.keys(projectFiles).forEach((fileName, index) => {
-            const btn = document.createElement('button');
-            btn.className = 'tab-btn' + (index === 0 ? ' active' : '');
-            btn.textContent = fileName;
-            btn.onclick = () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                contentBox.textContent = projectFiles[fileName];
-            };
-            tabsContainer.appendChild(btn);
+        // Drag & Drop hodisalari
+        const dropZone = document.querySelector('.drop-zone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.background = '#e7f1ff';
         });
 
-        contentBox.textContent = projectFiles['app.py'];
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.background = '#f8faff';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.background = '#f8faff';
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('video/')) {
+                document.getElementById('fileInput').files = files;
+                handleFileSelect({ target: { files: files } });
+            }
+        });
     </script>
+
 </body>
 </html>
