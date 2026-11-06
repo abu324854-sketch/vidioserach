@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Search & Intelligent Media Player Pro</title>
+    <title>Video Ekrani va Nutqidan Matn Qidiruv Pro</title>
+    <!-- Tesseract.js (Ekrondagi matnni / OCR aniqlash kutubxonasi) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -12,142 +14,99 @@
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --primary: #3b82f6;
-            --primary-hover: #2563eb;
             --accent: #10b981;
-            --danger: #ef4444;
             --input-bg: #0f172a;
         }
 
-        body.light-mode {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --card-border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --accent: #059669;
-            --danger: #dc2626;
-            --input-bg: #f1f5f9;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
-        body { background: var(--bg-color); color: var(--text-main); padding: 24px; display: flex; justify-content: center; min-height: 100vh; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+        body { background: var(--bg-color); color: var(--text-main); padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
         .app-container { max-width: 850px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
-        .card { background: var(--card-bg); border: 1px solid var(--card-border); padding: 28px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .header h1 { font-size: 24px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        h1 { font-size: 22px; color: var(--primary); margin-bottom: 20px; text-align: center; }
         
-        .btn { padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-        .btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid var(--card-border); }
-        .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); }
-        .btn-success { background: var(--accent); color: #fff; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input[type="text"] { flex: 1; padding: 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 8px; outline: none; }
         
-        .input-group { display: flex; gap: 10px; margin-bottom: 16px; }
-        input[type="text"] { flex: 1; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 10px; font-size: 14px; outline: none; }
-        input[type="text"]:focus { border-color: var(--primary); }
+        .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; background: var(--primary); color: #fff; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; }
 
-        .drop-zone { border: 2px dashed var(--card-border); border-radius: 14px; padding: 28px; text-align: center; background: rgba(255,255,255,0.01); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
-        .drop-zone:hover { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
-
+        .drop-zone { border: 2px dashed var(--card-border); border-radius: 12px; padding: 24px; text-align: center; background: rgba(255,255,255,0.02); cursor: pointer; }
+        
         .video-wrapper { display: none; margin-top: 20px; }
-        video { width: 100%; border-radius: 12px; background: #000; max-height: 420px; }
+        video { width: 100%; border-radius: 10px; background: #000; max-height: 400px; }
 
-        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; background: rgba(0,0,0,0.15); padding: 12px; border-radius: 12px; }
-        .select-custom { padding: 8px 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); border-radius: 8px; font-size: 13px; outline: none; }
+        .mode-selector { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 10px; }
+        .mode-btn { flex: 1; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-sub); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-align: center; }
+        .mode-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-        .search-box { margin-top: 20px; display: flex; gap: 10px; }
-        .results-container { margin-top: 12px; max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .result-card { padding: 10px 14px; background: var(--input-bg); border-left: 4px solid var(--primary); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .result-card:hover { background: rgba(59, 130, 246, 0.1); }
-        .badge { background: var(--primary); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .scan-progress { display: none; margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 6px; font-size: 13px; color: var(--primary); text-align: center; }
 
-        .shortcut-info { margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 12px; color: var(--text-sub); line-height: 1.6; }
+        .results-list { margin-top: 12px; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .result-item { padding: 10px 14px; background: var(--input-bg); border-left: 4px solid var(--primary); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .result-item:hover { background: rgba(59, 130, 246, 0.15); }
+        .badge { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="card">
-        <div class="header">
-            <h1>⚡ Video Player & Nutq Qidiruv Pro</h1>
-            <button class="btn btn-secondary" onclick="toggleTheme()">🌙 Rejim</button>
-        </div>
+        <h1>🔍 Universal Video Matn Qidiruvi (Ekranda & Nutqda)</h1>
 
-        <!-- 1. Ssilka orqali yuklash -->
+        <!-- 1. URL orqali -->
         <div class="input-group">
             <input type="text" id="videoUrl" placeholder="Video havolasini kiriting (https://...)">
-            <button class="btn btn-primary" onclick="loadUrl()">Ochish</button>
+            <button class="btn" onclick="loadUrl()">Ochish</button>
         </div>
 
         <!-- 2. Fayl yuklash -->
-        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-            <div style="font-size: 36px; margin-bottom: 8px;">📁</div>
-            <p style="font-weight: 600;">Videoni shu yerga tashlang yoki faylni tanlang</p>
-            <p style="font-size: 13px; color: var(--text-sub); margin-top: 4px;">MP4, WebM, MKV formatlari qo'llab-quvvatlanadi</p>
+        <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+            📁 Videoni shu yerga tashlang yoki fayl tanlang
             <input type="file" id="fileInput" accept="video/*" style="display:none" onchange="loadFile(event)">
         </div>
 
-        <!-- Subtitr yuklash -->
-        <div style="margin-top: 16px;">
-            <label style="font-size: 13px; color: var(--text-sub);">💡 Videodagi nutq bo'yicha qidirish uchun subtitr (.vtt, .srt) biriktiring:</label>
-            <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 6px; display: block; font-size: 13px;">
+        <!-- Subtitr ixtiyoriy -->
+        <div style="margin-top: 10px; font-size: 12px; color: var(--text-sub);">
+            💡 Subtitr fayli (.srt/.vtt) bo'lsa yuklang (ixtiyoriy, tezroq qidiradi):
+            <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 4px; display: block;">
         </div>
 
-        <!-- Video Player va Xususiyatlar -->
+        <!-- Video Player -->
         <div class="video-wrapper" id="videoWrapper">
-            <video id="player" controls></video>
+            <video id="player" controls crossorigin="anonymous"></video>
 
-            <div class="controls-grid">
-                <div>
-                    <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 4px;">Tezlik</label>
-                    <select class="select-custom" style="width: 100%;" onchange="changeSpeed(this.value)">
-                        <option value="0.5">0.5x</option>
-                        <option value="1.0" selected>1.0x (Normal)</option>
-                        <option value="1.25">1.25x</option>
-                        <option value="1.5">1.5x</option>
-                        <option value="2.0">2.0x</option>
-                    </select>
-                </div>
-                <button class="btn btn-success" onclick="takeSnapshot()">📷 Skrinshot</button>
-                <button class="btn btn-secondary" onclick="togglePiP()">🖼️ PiP Oyna</button>
-                <button class="btn btn-primary" onclick="addBookmark()">📌 Vaqt belgisi</button>
+            <!-- Qidiruv rejimlari -->
+            <div class="mode-selector">
+                <div class="mode-btn active" id="modeAll" onclick="setSearchMode('all')">🌐 Har qanday matn (Ekranda + Nutqda)</div>
+                <div class="mode-btn" id="modeScreen" onclick="setSearchMode('screen')">🖼️ Faqat ekrandagi matnlar (OCR)</div>
             </div>
 
-            <!-- In-Video Text Search -->
-            <div class="search-box">
-                <input type="text" id="searchKeyword" placeholder="Videodagi nutq matnini yozing (Ctrl+F)..." oninput="searchInVideo()">
-                <button class="btn btn-primary" onclick="searchInVideo()">Qidirish</button>
-            </div>
-            <div class="results-container" id="resultsContainer"></div>
-
-            <!-- Vaqt belgilari ro'yxati -->
-            <div style="margin-top: 20px;">
-                <h4 style="font-size: 14px; margin-bottom: 8px;">📌 Saqlangan Vaqt Belgilari</h4>
-                <div class="results-container" id="bookmarksContainer"><i>Belgilar yo'q.</i></div>
+            <!-- Matnli Qidiruv -->
+            <div class="input-group">
+                <input type="text" id="searchKeyword" placeholder="Videodan qidirmoqchi bo'lgan matningizni yozing..." onkeypress="if(event.key==='Enter') startSearch()">
+                <button class="btn" onclick="startSearch()">Qidirish</button>
             </div>
 
-            <!-- Klaviatura Shotkatlari Ko'rsatmasi -->
-            <div class="shortcut-info">
-                <strong>⌨️ Tezkor Tugmalar:</strong> <b>Space / K</b> - Pauza/Ijro | <b>F</b> - To'liq ekran | <b>M</b> - Ovozni o'chirish | <b>← / →</b> - 5 sek orqaga/oldinga | <b>Ctrl+F</b> - Matn qidiruv
-            </div>
+            <div class="scan-progress" id="scanProgress">🔍 Video kadrlari skanerlanmoqda, kuting...</div>
+
+            <!-- Natijalar -->
+            <div class="results-list" id="resultsList"></div>
         </div>
     </div>
 </div>
 
-<canvas id="snapshotCanvas" style="display:none;"></canvas>
+<canvas id="scanCanvas" style="display:none;"></canvas>
 
 <script>
     const player = document.getElementById('player');
     const videoWrapper = document.getElementById('videoWrapper');
-    const resultsContainer = document.getElementById('resultsContainer');
-    const bookmarksContainer = document.getElementById('bookmarksContainer');
+    const resultsList = document.getElementById('resultsList');
+    const scanProgress = document.getElementById('scanProgress');
+    const scanCanvas = document.getElementById('scanCanvas');
+    
     let subtitles = [];
-    let bookmarks = [];
+    let searchMode = 'all';
 
     function loadFile(e) {
         const file = e.target.files[0];
@@ -165,61 +124,10 @@
         }
     }
 
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-    }
-
-    function changeSpeed(speed) {
-        player.playbackRate = parseFloat(speed);
-    }
-
-    async function togglePiP() {
-        try {
-            if (document.pictureInPictureElement) {
-                await document.exitPictureInPicture();
-            } else {
-                await player.requestPictureInPicture();
-            }
-        } catch (err) {
-            alert("Brauzeringiz Picture-in-Picture funksiyasini qo'llab-quvvatlamaydi.");
-        }
-    }
-
-    function takeSnapshot() {
-        const canvas = document.getElementById('snapshotCanvas');
-        canvas.width = player.videoWidth;
-        canvas.height = player.videoHeight;
-        canvas.getContext('2d').drawImage(player, 0, 0, canvas.width, canvas.height);
-
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = `kadr_${Math.floor(player.currentTime)}s.png`;
-        a.click();
-    }
-
-    function addBookmark() {
-        const time = player.currentTime;
-        const formatted = formatTime(time);
-        const label = prompt("Belgi izohini kiriting:", `Vaqt: ${formatted}`);
-        if (label !== null) {
-            bookmarks.push({ time, label: label || formatted, formatted });
-            renderBookmarks();
-        }
-    }
-
-    function renderBookmarks() {
-        if (!bookmarks.length) {
-            bookmarksContainer.innerHTML = '<i>Belgilar yo\'q.</i>';
-            return;
-        }
-        bookmarksContainer.innerHTML = '';
-        bookmarks.forEach(bm => {
-            const el = document.createElement('div');
-            el.className = 'result-card';
-            el.innerHTML = `<span>📌 ${bm.label}</span> <span class="badge">${bm.formatted}</span>`;
-            el.onclick = () => { player.currentTime = bm.time; player.play(); };
-            bookmarksContainer.appendChild(el);
-        });
+    function setSearchMode(mode) {
+        searchMode = mode;
+        document.getElementById('modeAll').classList.toggle('active', mode === 'all');
+        document.getElementById('modeScreen').classList.toggle('active', mode === 'screen');
     }
 
     function loadSubtitles(e) {
@@ -228,7 +136,7 @@
         const reader = new FileReader();
         reader.onload = (evt) => {
             parseSRT(evt.target.result);
-            alert("Subtitr yuklandi va tahlil qilindi!");
+            alert("Subtitr matnlari yuklandi!");
         };
         reader.readAsText(file);
     }
@@ -260,49 +168,73 @@
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    function searchInVideo() {
+    // Har qanday vaziyatda matn qidirish (OCR + Subtitr)
+    async function startSearch() {
         const query = document.getElementById('searchKeyword').value.toLowerCase().trim();
-        resultsContainer.innerHTML = '';
+        resultsList.innerHTML = '';
         if (!query) return;
 
-        const matches = subtitles.filter(s => s.text.toLowerCase().includes(query));
-        if (!matches.length) {
-            resultsContainer.innerHTML = '<div class="result-card">Mos keluvchi nutq topilmadi.</div>';
-            return;
+        let found = false;
+
+        // 1. Subtitr/Nutq xotirasidan qidirish
+        if (searchMode !== 'screen' && subtitles.length > 0) {
+            const matches = subtitles.filter(s => s.text.toLowerCase().includes(query));
+            matches.forEach(m => {
+                addResultItem(`💬 Nutqda: "${m.text}"`, m.time);
+                found = true;
+            });
         }
 
-        matches.forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'result-card';
-            div.innerHTML = `<span>💬 ${m.text}</span> <span class="badge">${formatTime(m.time)}</span>`;
-            div.onclick = () => { player.currentTime = m.time; player.play(); };
-            resultsContainer.appendChild(div);
-        });
-    }
+        // 2. Video Ekranidagi kadrlarni skanerlash (OCR yordamida ekrandagi yozuvlarni topish)
+        scanProgress.style.display = 'block';
+        scanProgress.textContent = "🔍 Video ekranidagi kadrlardan matn skanerlanmoqda (har 3 soniyada)...";
 
-    // Hotkeys / Keyboards
-    window.addEventListener('keydown', (e) => {
-        if (document.activeElement.tagName === 'INPUT') return;
-        
-        if (e.code === 'Space' || e.key === 'k') {
-            e.preventDefault();
-            player.paused ? player.play() : player.pause();
-        } else if (e.key === 'f') {
-            if (!document.fullscreenElement) player.requestFullscreen();
-            else document.exitFullscreen();
-        } else if (e.key === 'm') {
-            player.muted = !player.muted;
-        } else if (e.key === 'ArrowRight') {
-            player.currentTime += 5;
-        } else if (e.key === 'ArrowLeft') {
-            player.currentTime -= 5;
-        } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            if (videoWrapper.style.display === 'block') {
-                e.preventDefault();
-                document.getElementById('searchKeyword').focus();
+        const duration = player.duration || 60;
+        const step = 3; // Har 3 soniyadagi kadrni tekshirish
+        const ctx = scanCanvas.getContext('2d');
+        scanCanvas.width = player.videoWidth || 640;
+        scanCanvas.height = player.videoHeight || 360;
+
+        const originalTime = player.currentTime;
+
+        for (let time = 0; time < duration; time += step) {
+            player.currentTime = time;
+            await new Promise(r => setTimeout(r, 150)); // Kadr yuklanishini kutish
+
+            ctx.drawImage(player, 0, 0, scanCanvas.width, scanCanvas.height);
+            
+            try {
+                // Tesseract AI yordamida kadrdagi matnni o'qish
+                const result = await Tesseract.recognize(scanCanvas, 'eng+rus');
+                const textOnScreen = result.data.text.toLowerCase();
+
+                if (textOnScreen.includes(query)) {
+                    addResultItem(`🖼️ Ekranda: "${result.data.text.trim().substring(0, 40)}..."`, time);
+                    found = true;
+                }
+            } catch (err) {
+                console.log("Kadr o'qishda xato:", err);
             }
         }
-    });
+
+        player.currentTime = originalTime;
+        scanProgress.style.display = 'none';
+
+        if (!found) {
+            resultsList.innerHTML = '<div class="result-item">Ushbu matn ekranda ham, nutqda ham topilmadi.</div>';
+        }
+    }
+
+    function addResultItem(text, time) {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        div.innerHTML = `<span>${text}</span> <span class="badge">${formatTime(time)}</span>`;
+        div.onclick = () => {
+            player.currentTime = time;
+            player.play();
+        };
+        resultsList.appendChild(div);
+    }
 </script>
 
 </body>
