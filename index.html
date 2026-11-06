@@ -3,223 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Qidiruv va Yuklovchi</title>
+    <title>Video Ichidan Qidiruv Tizimi</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #f0f2f5;
-            color: #1c1e21;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .main-card {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-        }
-
-        h1 {
-            font-size: 24px;
-            color: #0d6efd;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .section-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #495057;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: #0d6efd;
-        }
-
-        button {
-            padding: 12px 20px;
-            background-color: #0d6efd;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background-color: #0b5ed7;
-        }
-
-        /* Drag & Drop Fayl Zonasi */
-        .drop-zone {
-            border: 2px dashed #0d6efd;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            background: #f8faff;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: background 0.2s;
-        }
-
-        .drop-zone:hover {
-            background: #e7f1ff;
-        }
-
-        .drop-zone p {
-            color: #6c757d;
-            font-size: 14px;
-            margin-top: 8px;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        /* Video Pleyer Zonasi */
-        .video-container {
-            margin-top: 20px;
-            display: none;
-            text-align: center;
-        }
-
-        video {
-            width: 100%;
-            border-radius: 10px;
-            background: #000;
-            max-height: 350px;
-        }
-
-        .download-btn {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 10px 20px;
-            background-color: #198754;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .download-btn:hover {
-            background-color: #157347;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: #f0f2f5; color: #1c1e21; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+        .card { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); max-width: 650px; width: 100%; }
+        h1 { color: #0d6efd; font-size: 22px; text-align: center; margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 15px; outline: none; }
+        button { padding: 12px 20px; background: #0d6efd; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        button:hover { background: #0b5ed7; }
+        .drop-zone { border: 2px dashed #0d6efd; border-radius: 12px; padding: 25px; text-align: center; background: #f8faff; cursor: pointer; margin-bottom: 15px; }
+        .video-box { display: none; margin-top: 15px; }
+        video { width: 100%; border-radius: 10px; background: #000; max-height: 350px; }
+        .search-in-video { display: flex; gap: 8px; margin-top: 15px; background: #e7f1ff; padding: 12px; border-radius: 8px; border: 1px solid #0d6efd; }
+        .results-list { margin-top: 10px; max-height: 150px; overflow-y: auto; }
+        .result-item { padding: 8px 12px; background: #f8f9fa; border-left: 4px solid #0d6efd; margin-bottom: 6px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; font-size: 14px; }
+        .result-item:hover { background: #e9ecef; }
+        .time-badge { font-weight: bold; color: #0d6efd; }
+        .sub-input { margin-top: 10px; font-size: 13px; color: #6c757d; }
     </style>
 </head>
 <body>
 
-    <div class="main-card">
-        <h1>🎬 Video Qidiruv va Yuklash</h1>
+<div class="card">
+    <h1>🎬 Video va Nutq Qidiruv Tizimi</h1>
 
-        <!-- 1. Ssilka orqali yuklash / ko'rish -->
-        <div class="section-title">1. Internet yoki tarmoqlardan havola (link) orqali:</div>
-        <div class="input-group">
-            <input type="text" id="videoUrlInput" placeholder="Video havolasini kiriting (https://...)">
-            <button onclick="loadFromUrl()">Ochish</button>
-        </div>
-
-        <!-- 2. Kompyuter/Telefondan fayl yuklash -->
-        <div class="section-title">2. Qurilmangizdan video fayl tanlang:</div>
-        <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-            <span style="font-size: 32px;">📁</span>
-            <p>Videoni shu yerga tashlang yoki fayl tanlash uchun bosing</p>
-            <input type="file" id="fileInput" accept="video/*" onchange="handleFileSelect(event)">
-        </div>
-
-        <!-- Video pleyer va yuklash tugmasi -->
-        <div class="video-container" id="videoContainer">
-            <div class="section-title">Video tomosha va yuklab olish:</div>
-            <video id="videoPlayer" controls></video>
-            <br>
-            <a id="downloadLink" class="download-btn" download="video.mp4">Videoni saqlash (Download)</a>
-        </div>
+    <!-- 1. Havola -->
+    <div class="input-group">
+        <input type="text" id="videoUrl" placeholder="Video havolasini kiriting (https://...)">
+        <button onclick="loadUrl()">Ochish</button>
     </div>
 
-    <script>
-        const videoContainer = document.getElementById('videoContainer');
-        const videoPlayer = document.getElementById('videoPlayer');
-        const downloadLink = document.getElementById('downloadLink');
+    <!-- 2. Fayl yuklash -->
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+        📁 Videoni shu yerga tashlang yoki fayl tanlang
+        <input type="file" id="fileInput" accept="video/*" style="display:none" onchange="loadFile(event)">
+    </div>
 
-        // 1. Ssilka (URL) orqali yuklash va pleyerga qo'yish
-        function loadFromUrl() {
-            const url = document.getElementById('videoUrlInput').value.trim();
-            if (!url) {
-                alert("Iltimos, haqiqiy video havolasini kiriting!");
-                return;
+    <!-- Subtitr/Matn yuklash (Videodagi nutq qidiruvi uchun) -->
+    <div class="sub-input">
+        <label>💡 Videodagi nutq/subtitr faylini (.vtt/.srt) yuklasangiz, matn bo'yicha aniq soniyasiga o'tadi:</label>
+        <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 5px;">
+    </div>
+
+    <!-- Video Pleyer va Qidiruv -->
+    <div class="video-box" id="videoBox">
+        <video id="player" controls></video>
+
+        <!-- Video ichidan Ctrl+F / Matnli qidiruv -->
+        <div class="search-in-video">
+            <input type="text" id="searchKeyword" placeholder="Videodagi so'z yoki matnni yozing (Ctrl+F)..." oninput="searchInVideo()">
+            <button onclick="searchInVideo()">Topish</button>
+        </div>
+
+        <div class="results-list" id="resultsList"></div>
+    </div>
+</div>
+
+<script>
+    const player = document.getElementById('player');
+    const videoBox = document.getElementById('videoBox');
+    const resultsList = document.getElementById('resultsList');
+    let subtitles = [];
+
+    // Videoni fayldan yuklash
+    function loadFile(e) {
+        const file = e.target.files[0];
+        if (file) {
+            player.src = URL.createObjectURL(file);
+            videoBox.style.display = 'block';
+        }
+    }
+
+    // Videoni URL'dan yuklash
+    function loadUrl() {
+        const url = document.getElementById('videoUrl').value.trim();
+        if (url) {
+            player.src = url;
+            videoBox.style.display = 'block';
+        }
+    }
+
+    // Subtitr (nutq matni) faylini o'qish
+    function loadSubtitles(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            parseSRT(evt.target.result);
+            alert("Subtitr va nutq matni yuklandi! Endi matn bo'yicha qidirishingiz mumkin.");
+        };
+        reader.readAsText(file);
+    }
+
+    // SRT/VTT matn formatini soniyalarga ajratish
+    function parseSRT(data) {
+        subtitles = [];
+        const blocks = data.split(/\n\s*\n/);
+        blocks.forEach(block => {
+            const lines = block.trim().split('\n');
+            if (lines.length >= 2) {
+                const timeLine = lines.find(l => l.includes('-->'));
+                const textLines = lines.slice(lines.indexOf(timeLine) + 1).join(' ');
+                if (timeLine) {
+                    const [start] = timeLine.split('-->');
+                    const seconds = timeToSeconds(start.trim());
+                    subtitles.push({ time: seconds, text: textLines });
+                }
             }
+        });
+    }
 
-            videoPlayer.src = url;
-            downloadLink.href = url;
-            downloadLink.target = "_blank";
-            videoContainer.style.display = "block";
-            videoPlayer.play();
+    function timeToSeconds(timeStr) {
+        const parts = timeStr.replace(',', '.').split(':');
+        if (parts.length === 3) {
+            return parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]);
+        }
+        return 0;
+    }
+
+    // Video ichidan matn qidirish va o'sha joyini ochib berish
+    function searchInVideo() {
+        const query = document.getElementById('searchKeyword').value.toLowerCase().trim();
+        resultsList.innerHTML = '';
+
+        if (!query) return;
+
+        const matches = subtitles.filter(item => item.text.toLowerCase().includes(query));
+
+        if (matches.length === 0) {
+            resultsList.innerHTML = '<div class="result-item">Ushbu so\'z video nutqida topilmadi.</div>';
+            return;
         }
 
-        // 2. Qurilma ichidagi faylni tanlash va ijro etish
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const fileURL = URL.createObjectURL(file);
-                videoPlayer.src = fileURL;
-                downloadLink.href = fileURL;
-                downloadLink.download = file.name;
-                videoContainer.style.display = "block";
-                videoPlayer.play();
+        matches.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            const minutes = Math.floor(item.time / 60);
+            const seconds = Math.floor(item.time % 60);
+            const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            div.innerHTML = `<span>${item.text}</span> <span class="time-badge">${timeFormatted}</span>`;
+            div.onclick = () => {
+                player.currentTime = item.time;
+                player.play();
+            };
+            resultsList.appendChild(div);
+        });
+    }
+
+    // Klaviaturadan Ctrl+F bosilganda avtomatik qidiruv qatoriga fokus berish
+    window.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            if (videoBox.style.display === 'block') {
+                e.preventDefault();
+                document.getElementById('searchKeyword').focus();
             }
         }
-
-        // Drag & Drop hodisalari
-        const dropZone = document.querySelector('.drop-zone');
-        
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.background = '#e7f1ff';
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.background = '#f8faff';
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.background = '#f8faff';
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].type.startsWith('video/')) {
-                document.getElementById('fileInput').files = files;
-                handleFileSelect({ target: { files: files } });
-            }
-        });
-    </script>
+    });
+</script>
 
 </body>
 </html>
