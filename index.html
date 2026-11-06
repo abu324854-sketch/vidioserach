@@ -3,33 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Ichidan Qidiruv Tizimi</title>
+    <title>Video Qidiruv va Player (To'liq Versiya)</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: #f0f2f5; color: #1c1e21; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
-        .card { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); max-width: 650px; width: 100%; }
-        h1 { color: #0d6efd; font-size: 22px; text-align: center; margin-bottom: 20px; }
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #1c1e21;
+            --primary: #0d6efd;
+            --border-color: #ced4da;
+            --input-bg: #ffffff;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary: #3d8bfd;
+            --border-color: #444;
+            --input-bg: #2d2d2d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; transition: background 0.2s, color 0.2s; }
+        body { background: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); max-width: 700px; width: 100%; position: relative; }
+        
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { color: var(--primary); font-size: 22px; }
+        .theme-toggle { cursor: pointer; padding: 6px 12px; background: var(--primary); color: #fff; border: none; border-radius: 20px; font-weight: 600; font-size: 13px; }
+
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 15px; outline: none; }
-        button { padding: 12px 20px; background: #0d6efd; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        button:hover { background: #0b5ed7; }
-        .drop-zone { border: 2px dashed #0d6efd; border-radius: 12px; padding: 25px; text-align: center; background: #f8faff; cursor: pointer; margin-bottom: 15px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); border-radius: 8px; font-size: 15px; outline: none; }
+        button { padding: 12px 18px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        button:hover { opacity: 0.9; }
+
+        .drop-zone { border: 2px dashed var(--primary); border-radius: 12px; padding: 20px; text-align: center; background: rgba(13, 110, 253, 0.05); cursor: pointer; margin-bottom: 15px; }
+        
         .video-box { display: none; margin-top: 15px; }
-        video { width: 100%; border-radius: 10px; background: #000; max-height: 350px; }
-        .search-in-video { display: flex; gap: 8px; margin-top: 15px; background: #e7f1ff; padding: 12px; border-radius: 8px; border: 1px solid #0d6efd; }
+        video { width: 100%; border-radius: 10px; background: #000; max-height: 380px; }
+
+        /* Asboblar paneli (Tools Bar) */
+        .tools-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; }
+        .tool-btn { padding: 8px 12px; font-size: 13px; background: #28a745; }
+        .speed-select { padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); }
+
+        .search-in-video { display: flex; gap: 8px; margin-top: 15px; }
         .results-list { margin-top: 10px; max-height: 150px; overflow-y: auto; }
-        .result-item { padding: 8px 12px; background: #f8f9fa; border-left: 4px solid #0d6efd; margin-bottom: 6px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; font-size: 14px; }
-        .result-item:hover { background: #e9ecef; }
-        .time-badge { font-weight: bold; color: #0d6efd; }
-        .sub-input { margin-top: 10px; font-size: 13px; color: #6c757d; }
+        .result-item { padding: 8px 12px; background: rgba(0,0,0,0.04); border-left: 4px solid var(--primary); margin-bottom: 6px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; font-size: 14px; }
+        .result-item:hover { background: rgba(0,0,0,0.08); }
+        .time-badge { font-weight: bold; color: var(--primary); }
+        
+        .bookmarks-sec { margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px; }
+        .sub-input { margin-top: 10px; font-size: 13px; opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>🎬 Video va Nutq Qidiruv Tizimi</h1>
+    <div class="header-bar">
+        <h1>🎬 Video Qidiruv va Media Player</h1>
+        <button class="theme-toggle" onclick="toggleDarkMode()">🌙 Qorong'i Rejim</button>
+    </div>
 
-    <!-- 1. Havola -->
+    <!-- 1. Ssilka orqali yuklash -->
     <div class="input-group">
         <input type="text" id="videoUrl" placeholder="Video havolasini kiriting (https://...)">
         <button onclick="loadUrl()">Ochish</button>
@@ -41,31 +76,58 @@
         <input type="file" id="fileInput" accept="video/*" style="display:none" onchange="loadFile(event)">
     </div>
 
-    <!-- Subtitr/Matn yuklash (Videodagi nutq qidiruvi uchun) -->
+    <!-- Subtitr fayli yuklash -->
     <div class="sub-input">
-        <label>💡 Videodagi nutq/subtitr faylini (.vtt/.srt) yuklasangiz, matn bo'yicha aniq soniyasiga o'tadi:</label>
+        <label>💡 Subtitr faylini (.srt/.vtt) yuklasangiz, nutq bo'yicha qidiruv yoqiladi:</label>
         <input type="file" id="subInput" accept=".vtt,.srt" onchange="loadSubtitles(event)" style="margin-top: 5px;">
     </div>
 
-    <!-- Video Pleyer va Qidiruv -->
+    <!-- Video Pleyer va Boshqaruv Panel -->
     <div class="video-box" id="videoBox">
         <video id="player" controls></video>
 
-        <!-- Video ichidan Ctrl+F / Matnli qidiruv -->
+        <!-- Funksional tugmalar -->
+        <div class="tools-bar">
+            <div>
+                <label style="font-size: 13px; font-weight: bold;">Tezlik: </label>
+                <select class="speed-select" onchange="changeSpeed(this.value)">
+                    <option value="0.5">0.5x</option>
+                    <option value="1.0" selected>1.0x (Normal)</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2.0">2.0x</option>
+                </select>
+            </div>
+            <button class="tool-btn" onclick="takeSnapshot()">📷 Skrinshot Olish</button>
+            <button class="tool-btn" style="background:#ffc107; color:#000;" onclick="addBookmark()">📌 Vaqt Belgisini Saqlash</button>
+        </div>
+
+        <!-- Video ichidan Ctrl+F va Matnli Qidiruv -->
         <div class="search-in-video">
             <input type="text" id="searchKeyword" placeholder="Videodagi so'z yoki matnni yozing (Ctrl+F)..." oninput="searchInVideo()">
             <button onclick="searchInVideo()">Topish</button>
         </div>
 
         <div class="results-list" id="resultsList"></div>
+
+        <!-- Saqlangan vaqt belgilari (Bookmarks) -->
+        <div class="bookmarks-sec">
+            <h4 style="font-size: 14px; margin-bottom: 8px;">📌 Saqlangan Vaqt Belgilari:</h4>
+            <div id="bookmarksList"><i>Hali hech qanday vaqt belgisi saqlanmadi.</i></div>
+        </div>
     </div>
 </div>
+
+<!-- Yordamchi Canvas element (Skrinshot uchun) -->
+<canvas id="snapshotCanvas" style="display:none;"></canvas>
 
 <script>
     const player = document.getElementById('player');
     const videoBox = document.getElementById('videoBox');
     const resultsList = document.getElementById('resultsList');
+    const bookmarksList = document.getElementById('bookmarksList');
     let subtitles = [];
+    let bookmarks = [];
 
     // Videoni fayldan yuklash
     function loadFile(e) {
@@ -85,7 +147,60 @@
         }
     }
 
-    // Subtitr (nutq matni) faylini o'qish
+    // 1. Qorong'i Rejim (Dark Mode)
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    // 2. Ijro Tezligini O'zgartirish
+    function changeSpeed(speed) {
+        player.playbackRate = parseFloat(speed);
+    }
+
+    // 3. Videodan Skrinshot Olish
+    function takeSnapshot() {
+        const canvas = document.getElementById('snapshotCanvas');
+        canvas.width = player.videoWidth;
+        canvas.height = player.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(player, 0, 0, canvas.width, canvas.height);
+
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `video_skrinshot_${Math.floor(player.currentTime)}s.png`;
+        a.click();
+    }
+
+    // 4. Vaqt Belgisini Saqlash (Bookmark)
+    function addBookmark() {
+        const time = player.currentTime;
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+        const note = prompt("Eslatma yozing (ixtiyoriy):", `Vaqt belgisi - ${timeFormatted}`);
+        if (note !== null) {
+            bookmarks.push({ time, label: note || timeFormatted, timeFormatted });
+            renderBookmarks();
+        }
+    }
+
+    function renderBookmarks() {
+        if (bookmarks.length === 0) {
+            bookmarksList.innerHTML = '<i>Hali hech qanday vaqt belgisi saqlanmadi.</i>';
+            return;
+        }
+        bookmarksList.innerHTML = '';
+        bookmarks.forEach(bm => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `<span>📝 ${bm.label}</span> <span class="time-badge">${bm.timeFormatted}</span>`;
+            div.onclick = () => { player.currentTime = bm.time; player.play(); };
+            bookmarksList.appendChild(div);
+        });
+    }
+
+    // 5. Subtitr matni faylini (.srt/.vtt) o'qish va qidirish
     function loadSubtitles(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -93,12 +208,11 @@
         const reader = new FileReader();
         reader.onload = function(evt) {
             parseSRT(evt.target.result);
-            alert("Subtitr va nutq matni yuklandi! Endi matn bo'yicha qidirishingiz mumkin.");
+            alert("Subtitrlar yuklandi! Endi matn bo'yicha qidirishingiz mumkin.");
         };
         reader.readAsText(file);
     }
 
-    // SRT/VTT matn formatini soniyalarga ajratish
     function parseSRT(data) {
         subtitles = [];
         const blocks = data.split(/\n\s*\n/);
@@ -124,17 +238,14 @@
         return 0;
     }
 
-    // Video ichidan matn qidirish va o'sha joyini ochib berish
     function searchInVideo() {
         const query = document.getElementById('searchKeyword').value.toLowerCase().trim();
         resultsList.innerHTML = '';
-
         if (!query) return;
 
         const matches = subtitles.filter(item => item.text.toLowerCase().includes(query));
-
         if (matches.length === 0) {
-            resultsList.innerHTML = '<div class="result-item">Ushbu so\'z video nutqida topilmadi.</div>';
+            resultsList.innerHTML = '<div class="result-item">Matn topilmadi.</div>';
             return;
         }
 
@@ -146,15 +257,12 @@
             const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
             div.innerHTML = `<span>${item.text}</span> <span class="time-badge">${timeFormatted}</span>`;
-            div.onclick = () => {
-                player.currentTime = item.time;
-                player.play();
-            };
+            div.onclick = () => { player.currentTime = item.time; player.play(); };
             resultsList.appendChild(div);
         });
     }
 
-    // Klaviaturadan Ctrl+F bosilganda avtomatik qidiruv qatoriga fokus berish
+    // Ctrl + F tugmasi bosilganda avtomatik qidiruvga o'tish
     window.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
             if (videoBox.style.display === 'block') {
